@@ -5,6 +5,7 @@ Git workflow
 ------------
 
 1) Modify the code.
+
 2) Tell Git to start tracking new/modified source code
   
     $ git add .
