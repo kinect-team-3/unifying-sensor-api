@@ -6,11 +6,11 @@ Git workflow
 
 1) Modify the code.
 
-2) Tell Git to start tracking new/modified source code
+2) Tell Git to start tracking new/modified source code.
   
     $ git add .
 
-3) Commit code. Add useful comments
+3) Commit code. Add useful comments.
 
     $ git commit -m "Updated test.c to include tests on JPEG image."
 
