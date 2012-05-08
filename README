@@ -1,5 +1,0 @@
-How to compile and run test.c:
-1) cd into the test directory: cd unifying-sensor-api/test
-2) in test directory, run: gcc -I ../src -o test test.c
-3) once test has been built, run test: ./test <PATH_TO_IMAGE>
-example: ./test flower.jpg
