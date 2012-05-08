@@ -9,6 +9,11 @@
 int main(int argc, char *argv[]) {
 	
 	/* UNIMPORTANT: Open file and determine the file size */
+	if (argc != 2) {
+		fprintf(stderr, "Must specify only one JPEG file.\n");
+		exit(1);
+	}
+	
 	char *path = argv[1];
 	int fd = open(path, 0644);
 	struct stat *jpeg_info = (struct stat*) malloc(sizeof(struct stat));

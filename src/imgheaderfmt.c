@@ -1,4 +1,5 @@
 #include "imgheaderfmt.h"
+#include <stdio.h>
 
 int process_jpeg_image(void* buf) {
 	/* Extract the JPEG header. */
@@ -19,4 +20,7 @@ int process_jpeg_image(void* buf) {
 		/* JFIF header */
 		fprintf(stderr, "JPEG is of type JFIF");
 	}
+	
+	/* TO-DO: Return JPEG image as JSON object, change return type of function */
+	return -1;
 }
