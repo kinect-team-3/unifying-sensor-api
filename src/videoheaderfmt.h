@@ -1,0 +1,4 @@
+#ifndef VIDEOHEADERFMT_H
+#define VIDEOHEADERFMT_H
+
+#endif
