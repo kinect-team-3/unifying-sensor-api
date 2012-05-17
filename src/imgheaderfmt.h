@@ -14,17 +14,6 @@ typedef struct {
 	uint8_t		identifier[5];	//format identifier
 } __attribute((packed)) jpeg_header;
 
-/*
-typedef struct {
-	uint16_t	version;	//version, 1st byte major, 2nd minor
-	uint8_t		dunits;		//units for pixel density field
-	uint16_t	xdensity;	//horizontal pixel density
-	uint16_t	ydensity;	//vertical pixel density
-	uint8_t		xthumbnail;	//horizontal size (thumbnail)
-	uint8_t		ythumbnail;	//vertical size (thumbnail)
-} __attribute((packed)) jfif_header;
-*/
-
 /**
  * Header for the png format
  */
@@ -61,12 +50,4 @@ typedef struct {
 } __attribute((packed)) gif_header;
 
 int process_image(void* buf);
-static int process_jpeg_image(void* buf);
-//static int process_jfif_image(void* buf);
-//static int process_exif_image(void* buf);
-static int process_png_image(void* buf);
-static int process_bmp_image(void* buf);
-static int process_tiff_image(void* buf);
-static int process_gif_image(void* buf);
-
 #endif
