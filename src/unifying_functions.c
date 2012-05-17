@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "unifying_functions.h"
 
 static char* data_to_hex_string(const uint8_t* data, size_t length); 
@@ -28,9 +30,18 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t length
 
 /* TODO: Convert the raw unified data back to a raw datastream */
 uint8_t* convert_unified_to_raw (const char* data) {
+	return null;
 }
 
 
-/* TODO: implement this function to transform a datastream to hex string */
 static char* data_to_hex_string(const uint8_t* data, size_t length) {
+	char* hex_string = (char*) malloc(2*sizeof(char)*length+1);
+	size_t i;
+	/* print data one byte at a time as a set of two hex chars */
+	for(i = 0; i < length; i++) {
+		sprintf(hex_string+(2*i),"%02x", data[i]);
+	}	
+	/* null byte */
+	sprintf(hex_string+2*length, "\0");
+	return hex_string;
 } 
