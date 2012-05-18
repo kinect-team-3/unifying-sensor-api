@@ -4,7 +4,7 @@
 
 static char* data_to_hex_string(const uint8_t* data, size_t length); 
 
-char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t length
+char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t length,
 	const char* type, const char* desc, const char* sensor) {
 	/* remove the sensor headers */
 	uint8_t* plain_data = data + offset; 
@@ -22,15 +22,20 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t length
 	cJSON_AddNumberToObject(unified_root, "length", length); 
 	cJSON_AddStringToObject(unified_root, "sensor", sensor);
 	cJSON_AddStringToObject(unified_root, "data", hex_data);
-
-	/* TODO: calculate checksum and attach to root */
 	
-	return cJSON_Print(unified_root);
+	/* TODO: calculate checksum and attach to root */
+	/* dummy checksum */
+	char* unified_str = cJSON_Print(unified_root);
+	int checksum = 0xdeadbeef; 
+	cJSON_AddNumberToObject(unified_root, "checksum", checksum);
+	cJSON_Delete(unified_root);
+
+	return unified_str; 
 }
 
 /* TODO: Convert the raw unified data back to a raw datastream */
 uint8_t* convert_unified_to_raw (const char* data) {
-	return null;
+	return NULL;
 }
 
 
@@ -42,6 +47,6 @@ static char* data_to_hex_string(const uint8_t* data, size_t length) {
 		sprintf(hex_string+(2*i),"%02x", data[i]);
 	}	
 	/* null byte */
-	sprintf(hex_string+2*length, "\0");
+	hex_string[2*length] = '\0';
 	return hex_string;
 } 

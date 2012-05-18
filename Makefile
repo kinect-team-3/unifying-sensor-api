@@ -10,22 +10,36 @@ CC = gcc
 # -Wall			give verbose compiler warnings
 # -O0				do not optimize generated code
 # -std=c99	use the C99 standard language definition
-CFLAGS = -g -Wall -O0 -std=c99 -I src
+CFLAGS = -g -Wall -O0 -std=c99 -I lib -I src
+MATH = -lm
+NOLINK = -c
 
-test: test/test.o
-	$(CC) $(CFLAGS) test/test.o -o test/testprogram
+all: demotest
 
-videotest: test/videotest.o
-	$(CC) $(CFLAGS) test/videotest.o -o test/videotest
+demotest: unifying_functions.o demotest.o
+	$(CC) $(CFLAGS) $(MATH) test/demotest.o src/unifying_functions.o lib/JSONlib.a -o demotest 
 
-videotest.o: test/videotest.c src/videoheaderfmt.h
-	$(CC) $(CFLAGS) test/videotest.c
+demotest.o: test/demotest.c
+	$(CC) $(CFLAGS) $(NOLINK) test/demotest.c -o test/demotest.o 
+
+unifying_functions.o: src/unifying_functions.c src/unifying_functions.h  
+	$(CC) $(CFLAGS) $(NOLINK) src/unifying_functions.c -o src/unifying_functions.o  
+
+### I don't think these cases were written correctly
+
+#imagetest: test/imagetest.o src/imgheaderfmt.o 
+#	$(CC) $(CFLAGS) test/imagetest.o -o test/imagetestprogram
+
+#imgheaderfmt.o : src/imgheaderfmt.c src/imgheaderfmt.h
+#	$(CC) $(CFLAGS) src/imgheaderfmt.c
+
+#videotest: test/videotest.o
+#	$(CC) $(CFLAGS) test/videotest.o -o test/videotestprogram
+
+#videotest.o: test/videotest.c src/videoheaderfmt.h
+#	$(CC) $(CFLAGS) test/videotest.c
 		
-imgheaderfmt.o : src/imgheaderfmt.c src/imgheaderfmt.h
-	$(CC) $(CFLAGS) src/imgheaderfmt.c
-	
-test.o : src/imgheaderfmt.h test/test.c
-	$(CC) $(CFLAGS) test/test.c
-	
+
 clean:
-	@rm -rf test/test.o test/testprogram test/videotest.o test/videotest
+#	@rm -rf test/imagetest.o test/imagetestprogram test/videotest.o test/videotestprogram src/imgheaderfmt.o src/unifying_functions.o lib/cJSON.o test/demotest.o
+	@rm -rf test/demotest.o src/unifying_functions.o demotest
