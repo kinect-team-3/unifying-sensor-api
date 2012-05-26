@@ -16,8 +16,12 @@ NOLINK = -c
 
 all: demotest
 
-demotest: unifying_functions.o demotest.o
-	$(CC) $(CFLAGS) $(MATH) test/demotest.o src/unifying_functions.o lib/JSONlib.a -o demotest 
+demotest: unifying_functions.o demotest.o cJSON.o
+	$(CC) $(CFLAGS) $(MATH) test/demotest.o src/unifying_functions.o lib/cJSON.o -o demotest
+
+cJSON.o: lib/cJSON.c lib/cJSON.h
+	$(CC) $(CFLAGS) $(MATH) $(NOLINK) lib/cJSON.c -o lib/cJSON.o
+
 
 demotest.o: test/demotest.c
 	$(CC) $(CFLAGS) $(NOLINK) test/demotest.c -o test/demotest.o 
@@ -42,4 +46,4 @@ unifying_functions.o: src/unifying_functions.c src/unifying_functions.h
 
 clean:
 #	@rm -rf test/imagetest.o test/imagetestprogram test/videotest.o test/videotestprogram src/imgheaderfmt.o src/unifying_functions.o lib/cJSON.o test/demotest.o
-	@rm -rf test/demotest.o src/unifying_functions.o demotest
+	@rm -rf test/demotest.o src/unifying_functions.o lib/cJSON.o demotest

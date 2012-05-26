@@ -21,13 +21,13 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t length,
 	//Note max size of size_t varies per machine, meaning max length can vary 
 	cJSON_AddNumberToObject(unified_root, "length", length); 
 	cJSON_AddStringToObject(unified_root, "sensor", sensor);
+	int checksum = 0xdeadbeef; 
+	cJSON_AddNumberToObject(unified_root, "checksum", checksum);
 	cJSON_AddStringToObject(unified_root, "data", hex_data);
 	
 	/* TODO: calculate checksum and attach to root */
 	/* dummy checksum */
 	char* unified_str = cJSON_Print(unified_root);
-	int checksum = 0xdeadbeef; 
-	cJSON_AddNumberToObject(unified_root, "checksum", checksum);
 	cJSON_Delete(unified_root);
 
 	return unified_str; 
