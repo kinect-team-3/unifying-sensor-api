@@ -1,27 +1,20 @@
-#ifndef _CCRC32_H
-#define _CCRC32_H
+#ifndef CCRC32_H
+#define CCRC32_H
 
 #include <stdint.h>
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
 
-class CCRC32{
+uint32_t Reflect(uint32_t Reflect, const char Char);
+/*
+	Reflection is a requirement for the official CRC-32 standard.
+	You can create CRCs without it, but they won't conform to the standard.
+*/
 
-	public:
-		CCRC32(void);
-		~CCRC32(void);
+uint32_t checksum(char* data, size_t length);
+/*	
+	Given the data buffer and the size of the buffer, the function
+	calculates the checksum
+*/
 
-		void Initialize(void);
-
-		bool FileCRC(const char *FileName, uint32_t *OutCRC, uint32_t BufferSize);
-
-		uint32_t FullCRC(const char *Data, uint32_t DataLength);
-
-		void PartialCRC(uint32_t *CRC, const char *Data, uint32_t DataLength);
-
-	private:
-		uint32_t Reflect(uint32_t Reflect, const char Char);
-		uint32_t Table[256]; // CRC lookup table array.
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
+
