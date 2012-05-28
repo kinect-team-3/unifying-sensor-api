@@ -36,9 +36,33 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	return unified_str; 
 }
 
-/* TODO: Convert the raw unified data back to a raw datastream */
-uint8_t* convert_unified_to_raw (const char* data) {
-	return NULL;
+uint8_t* convert_unified_to_raw (const char* jsondata) {
+	uint8_t* bytestream = NULL;
+	char* hexstr = NULL;
+	/* Parse the JSON string */
+	cJSON *unified_root = cJSON_Parse(jsondata); 	
+	if (unified_root == NULL) {
+		return NULL;
+	}
+	/* Get the relevant JSON elements */
+	cJSON *datasize = cJSON_GetObjectItem(unified_root, "size");
+	cJSON *datastr = cJSON_GetObjectItem(unified_root, "data");
+	if (datastr == NULL || datasize == NULL) {
+		goto done;
+	} 
+	/* assume conversion from json int to size_t works */
+	size_t size = (size_t) cJSON_GetObjectItem(unified_root, "size")->valueint;
+	hexstr = cJSON_GetObjectItem(unified_root, "data")->valuestring;
+	if (hexstr == NULL) {
+		goto done;
+	}
+	bytestream =  hex_string_to_data(hexstr, size*2);
+
+/* clean up */
+done:
+	free(hexstr);
+	cJSON_Delete(unified_root);
+	return bytestream;
 }
 
 
