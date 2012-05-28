@@ -62,9 +62,8 @@ uint8_t* convert_unified_to_raw (const char* jsondata) {
 
 /* clean up */
 done:
-	free(hexstr);
-	hexstr = NULL;
-//	cJSON_Delete(unified_root);
+	/* hexstr is cleaned up by cJSON_Delete */
+	cJSON_Delete(unified_root);
 	unified_root = NULL;
 	return bytestream;
 }

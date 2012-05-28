@@ -10,7 +10,7 @@
 *    sensor type, datastream  
 * 3) Return the object
 */
-char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t length,
+char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	const char* type, const char* desc, const char* sensor);
 
 /**
