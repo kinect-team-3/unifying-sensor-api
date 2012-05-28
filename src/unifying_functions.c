@@ -12,7 +12,7 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	uint8_t* plain_data = data + offset; 
 	
 	/* convert datasteam into hex string */
-	char* hex_data = data_to_hex_string(plain_data, size-offset);
+	char* hexstr = data_to_hex_string(plain_data, size-offset);
 	
 	/* create a root cJSON object */		
 	cJSON* unified_root = cJSON_CreateObject();
@@ -26,13 +26,15 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	cJSON_AddStringToObject(unified_root, "sensor", sensor);
 	int checksum = 0xdeadbeef; 
 	cJSON_AddNumberToObject(unified_root, "checksum", checksum);
-	cJSON_AddStringToObject(unified_root, "data", hex_data);
+	cJSON_AddStringToObject(unified_root, "data", hexstr);
 	
 	/* TODO: calculate checksum and attach to root */
 	/* dummy checksum */
 	char* unified_str = cJSON_Print(unified_root);
 	cJSON_Delete(unified_root);
-
+	unified_root = NULL;
+	free(hexstr);
+	hexstr = NULL;
 	return unified_str; 
 }
 
@@ -61,7 +63,9 @@ uint8_t* convert_unified_to_raw (const char* jsondata) {
 /* clean up */
 done:
 	free(hexstr);
-	cJSON_Delete(unified_root);
+	hexstr = NULL;
+//	cJSON_Delete(unified_root);
+	unified_root = NULL;
 	return bytestream;
 }
 
@@ -142,6 +146,7 @@ static uint8_t* hex_string_to_data(const char* hexstr, size_t length) {
 			/* did not find a hex letter */
 			default: 
 				free(bytestream);
+				bytestream = NULL;
 				return NULL;
 		}		
 		if (odd) {

@@ -44,6 +44,12 @@ int main(int argc, char *argv[]) {
 	char* json_data = convert_raw_to_unified(imgbuf, 0, (size_t)jpeg_info->st_size, "JPEG", "JPEG stands for Joint Photographic Experts Group. An image processed with digital compression. See standard ISO/IEC 10918-4:1999 for more details.", "Cannon Camera");
 	
 	printf(json_data);
+	uint8_t *converted_imgbuf = convert_unified_to_raw(json_data);
+	FILE * jpegfile;
+	jpegfile = fopen("f.jpeg","wb");
+	fwrite(converted_imgbuf, 1, (size_t)jpeg_info->st_size, jpegfile);
+	fclose(jpegfile); 	
+	free(converted_imgbuf);
 	close(fd);		
 	free(imgbuf);
 	free(jpeg_info);
