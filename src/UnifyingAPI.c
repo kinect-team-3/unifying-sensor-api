@@ -8,9 +8,11 @@
  * Signature: (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
-  (JNIEnv *, jobject, jstring, jint, jint, jstring, jstring, jstring)
+  (JNIEnv *env, jobject obj, jstring data, jint offset, jint size, jstring type, jstring desc, jstring sensor)
   
 {
+	const char* cdata, ctype, cdesc, csensor;
+	size_t coffset, csize;
 }
 
 /*
@@ -19,8 +21,14 @@ JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1unified_1to_1raw
-  (JNIEnv *, jobject, jstring)
-
+  (JNIEnv *env, jobject obj, jstring data)
 
 {
+	const char* cdata = (*env)->GetStringUTFChars(env, data, NULL);
+	
+	uint8_t* result = convert_unified_to_raw(cdata);
+	
+	(*env)->ReleaseStringUTFChars(env, data, cdata);
+	
+	return (*env)->NewStringUTF(env, (char*) result);
 }
