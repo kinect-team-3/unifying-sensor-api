@@ -123,6 +123,7 @@ static int test_hex_to_data (const char* hexstr, size_t length,
 		printf("Expected and data do not match in test_hex_to_data\n");	
 		return -1;
 	}
+	free(bytestream);
 	return 0;
 }
 
@@ -134,9 +135,10 @@ int main() {
 	size_t length = 20; 
 	uint8_t dummy_data[10] = {0, 12, 13, 14, 25, 26, 27, 33, 200, 255};
 	char* hexstr = "000c0d0e191a1b21c8ff";
-	int retval = test_data_to_hex(dummy_data, 10, hexstr); 
+	int retval = test_data_to_hex(dummy_data, size, hexstr); 
 	printf("Return value for test_data_to_hex: %d\n", retval);
 	retval = test_hex_to_data(hexstr, length, dummy_data); 
 	printf("Return value for test_hex_to_data: %d\n", retval);
+	/* TODO: Add more test cases */
 	return 0; 			
 }
