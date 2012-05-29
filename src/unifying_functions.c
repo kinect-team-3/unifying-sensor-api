@@ -15,7 +15,7 @@ static uint8_t* hex_string_to_data(const char* hexstr, size_t length);
 char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	const char* type, const char* desc, const char* sensor) {
 	/* remove the sensor headers */
-	uint8_t* plain_data = data + offset; 
+	const uint8_t* plain_data = data + offset; 
 	
 	/* convert datasteam into hex string */
 	char* hexstr = data_to_hex_string(plain_data, size-offset);

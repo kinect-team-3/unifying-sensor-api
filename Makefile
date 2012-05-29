@@ -14,7 +14,7 @@ CFLAGS = -g -Wall -O0 -std=c99 -I lib -I src
 MATH = -lm
 NOLINK = -c
 
-all: demotest
+all: demotest translatetest
 
 demotest: unifying_functions.o demotest.o cJSON.o
 	$(CC) $(CFLAGS) $(MATH) test/demotest.o src/unifying_functions.o lib/cJSON.o -o demotest
@@ -28,6 +28,9 @@ demotest.o: test/demotest.c
 
 unifying_functions.o: src/unifying_functions.c src/unifying_functions.h  
 	$(CC) $(CFLAGS) $(NOLINK) src/unifying_functions.c -o src/unifying_functions.o  
+
+translatetest: test/translatetest.c
+	$(CC) $(CFLAGS) test/translatetest.c -o test/translatetest
 
 ### I don't think these cases were written correctly
 
@@ -46,4 +49,4 @@ unifying_functions.o: src/unifying_functions.c src/unifying_functions.h
 
 clean:
 #	@rm -rf test/imagetest.o test/imagetestprogram test/videotest.o test/videotestprogram src/imgheaderfmt.o src/unifying_functions.o lib/cJSON.o test/demotest.o
-	@rm -rf test/demotest.o src/unifying_functions.o lib/cJSON.o demotest
+	@rm -rf test/demotest.o src/unifying_functions.o lib/cJSON.o demotest test/translatetest
