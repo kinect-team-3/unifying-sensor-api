@@ -36,10 +36,17 @@ Before pushing code to Github
 Notes on building the shared library for CJavaInterface
 -------------------------------------------------------
 Compile the C files (change the path to jni.h accordingly)
+
     $ gcc -c -I/usr/lib/jvm/java-1.7.0-openjdk-i386/include -I/usr/lib/jvm/java-1.7.0-openjdk-i386/include/linux -I../lib unifying_functions.c UnifyingAPI.c ../lib/cJSON.c
+    
 Using the object files, build a shared library named "libCJavaInterface.so"
+
     $ ld -G UnifyingAPI.o unifying_functions.o cJSON.o -o libCJavaInterface.so -lm -lc -lpthread
+    
 Compile the java program
+
     $ javac HelloWorld.java
+    
 Run the Java program, make sure to include path to the shared lib
+
     $ java -Djava.library.path=./ HelloWorld
