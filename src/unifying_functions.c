@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include "unifying_functions.h"
 
+/* TODO: Refactor code if time allows. Make object oriented represented by a 
+	struct in memory (difficult in C). Object would be a typecast of the 
+	cJSON object limited to only elements in the unified data format 
+	(ie. type, size, checksum, data, description, sensor) Add getters and 
+	setters to avoid reparsing json string to get data every time. */
+
 static char* data_to_hex_string(const uint8_t* data, size_t size); 
 static uint8_t* hex_string_to_data(const char* hexstr, size_t length);
 
@@ -15,71 +21,106 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	char* hexstr = data_to_hex_string(plain_data, size-offset);
 	
 	/* create a root cJSON object */		
-	cJSON* unified_root = cJSON_CreateObject();
+	cJSON* unifiedroot = cJSON_CreateObject();
 
 	/* add all elements */
-	cJSON_AddStringToObject(unified_root, "type", type);
-	cJSON_AddStringToObject(unified_root, "description", desc);
+	cJSON_AddStringToObject(unifiedroot, "type", type);
+	cJSON_AddStringToObject(unifiedroot, "description", desc);
 	/*Note max size of size_t varies per machine, 
 		meaning max size can vary */ 
-	cJSON_AddNumberToObject(unified_root, "size", size); 
-	cJSON_AddStringToObject(unified_root, "sensor", sensor);
+	cJSON_AddNumberToObject(unifiedroot, "size", size); 
+	cJSON_AddStringToObject(unifiedroot, "sensor", sensor);
 	int checksum = 0xdeadbeef; 
-	cJSON_AddNumberToObject(unified_root, "checksum", checksum);
-	cJSON_AddStringToObject(unified_root, "data", hexstr);
+	cJSON_AddNumberToObject(unifiedroot, "checksum", checksum);
+	cJSON_AddStringToObject(unifiedroot, "data", hexstr);
 	
 	/* TODO: calculate checksum and attach to root */
 	/* dummy checksum */
-	char* unified_str = cJSON_Print(unified_root);
-	cJSON_Delete(unified_root);
-	unified_root = NULL;
+	char* unifiedstr = cJSON_Print(unifiedroot);
+	cJSON_Delete(unifiedroot);
+	unifiedroot = NULL;
 	free(hexstr);
 	hexstr = NULL;
-	return unified_str; 
+	return unifiedstr; 
 }
 
 uint8_t* convert_unified_to_raw (const char* jsondata) {
 	uint8_t* bytestream = NULL;
-	char* hexstr = NULL;
 	/* Parse the JSON string */
-	cJSON *unified_root = cJSON_Parse(jsondata); 	
-	if (unified_root == NULL) {
+	cJSON *unifiedroot = cJSON_Parse(jsondata); 	
+	if (unifiedroot == NULL) {
+		fprintf(stderr, "Improperly formatted JSON data.\n");
 		return NULL;
 	}
 	/* Get the relevant JSON elements */
-	cJSON *datasize = cJSON_GetObjectItem(unified_root, "size");
-	cJSON *datastr = cJSON_GetObjectItem(unified_root, "data");
+	cJSON *datasize = cJSON_GetObjectItem(unifiedroot, "size");
+	cJSON *datastr = cJSON_GetObjectItem(unifiedroot, "data");
 	if (datastr == NULL || datasize == NULL) {
+		fprintf(stderr, "No data element or no data size element.\n");
 		goto done;
 	} 
 	/* assume conversion from json int to size_t works */
-	size_t size = (size_t) cJSON_GetObjectItem(unified_root, "size")->valueint;
-	hexstr = cJSON_GetObjectItem(unified_root, "data")->valuestring;
-	if (hexstr == NULL) {
-		goto done;
-	}
-	bytestream =  hex_string_to_data(hexstr, size*2);
+	size_t size = (size_t) datasize->valueint;
+	bytestream =  hex_string_to_data(datastr->valuestring, size*2);
 
 /* clean up */
 done:
-	/* hexstr is cleaned up by cJSON_Delete */
-	cJSON_Delete(unified_root);
-	unified_root = NULL;
+	cJSON_Delete(unifiedroot);
+	unifiedroot = NULL;
 	return bytestream;
 }
 
+char* process_unified(const char* jsondata, int (*process)(uint8_t *, size_t *)) {
+	uint8_t* bytestream = NULL;
+	char* unifiedstr = NULL;
+	/* Parse the JSON string */
+	cJSON *unifiedroot = cJSON_Parse(jsondata); 	
+	if (unifiedroot == NULL) {
+		fprintf(stderr, "Improperly formatted JSON data.\n");
+		return NULL;
+	}
+	/* Get the relevant JSON elements */
+	cJSON *datasize = cJSON_GetObjectItem(unifiedroot, "size");
+	cJSON *datastr = cJSON_GetObjectItem(unifiedroot, "data");
+	if (datastr == NULL || datasize == NULL) {
+		fprintf(stderr, "No data element or no data size element.\n");
+		goto done;
+	} 
+	/* assume conversion from json int to size_t works */
+	size_t size = (size_t) datasize->valueint;
+	bytestream =  hex_string_to_data(datastr->valuestring, size*2);
+	/* pass the address of size because it can be modified */
+	if (process(bytestream, &size) < 0) {
+		fprintf(stderr, "Error in process function provided. Continuing...\n");
+	}
+	datasize->valueint = size;
+	free(datastr->valuestring);
+	datastr->valuestring = data_to_hex_string(bytestream, size);
+	unifiedstr = cJSON_Print(unifiedroot);
+	/* TODO: recalculate checksum as necessary to replace old */
+		
+/* clean up */
+done:
+	free(bytestream);
+	bytestream = NULL;
+	cJSON_Delete(unifiedroot);
+	unifiedroot = NULL;
+	return unifiedstr;
+} 
+
 
 static char* data_to_hex_string(const uint8_t* data, size_t size) {
-	char* hex_string = (char*) malloc(2*sizeof(char)*size+1);
+	char* hexstr = (char*) malloc(2*sizeof(char)*size+1);
 	size_t i;
 	/* print data one byte at a time as a set of two hex chars */
 	for(i = 0; i < size; i++) {
-		sprintf(hex_string+(2*i),"%02x", data[i]);
+		sprintf(hexstr+(2*i),"%02x", data[i]);
 	}	
 	/* null byte */
-	hex_string[2*size] = '\0';
-	return hex_string;
+	hexstr[2*size] = '\0';
+	return hexstr;
 } 
+
 
 static uint8_t* hex_string_to_data(const char* hexstr, size_t length) {
 	/*Note we expect length to be even given that the hex string
