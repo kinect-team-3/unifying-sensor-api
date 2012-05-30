@@ -16,7 +16,7 @@ char* convert_raw_to_unified (const uint8_t* data, size_t offset, size_t size,
 /**
 *
 */
-uint8_t* convert_unified_to_raw (const char* jsondata);
+uint8_t* convert_unified_to_raw (const char* jsondata, size_t* size);
 
 
 char* process_unified (const char* jsondata, int(*process)(uint8_t *, size_t *));  

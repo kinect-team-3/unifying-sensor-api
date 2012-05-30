@@ -44,7 +44,7 @@ char* convert_raw_to_unified(const uint8_t* data, size_t offset, size_t size,
 	return unifiedstr; 
 }
 
-uint8_t* convert_unified_to_raw (const char* jsondata) {
+uint8_t* convert_unified_to_raw (const char* jsondata, size_t* size) {
 	uint8_t* bytestream = NULL;
 	/* Parse the JSON string */
 	cJSON *unifiedroot = cJSON_Parse(jsondata); 	
@@ -60,8 +60,8 @@ uint8_t* convert_unified_to_raw (const char* jsondata) {
 		goto done;
 	} 
 	/* assume conversion from json int to size_t works */
-	size_t size = (size_t) datasize->valueint;
-	bytestream =  hex_string_to_data(datastr->valuestring, size*2);
+	*size = (size_t) datasize->valueint;
+	bytestream =  hex_string_to_data(datastr->valuestring, (*size)*2);
 
 /* clean up */
 done:
