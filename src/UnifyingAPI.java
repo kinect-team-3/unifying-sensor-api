@@ -1,9 +1,9 @@
 public class UnifyingAPI
 {
-	private native String convert_raw_to_unified(String data, int offset, int size,
+	native static String convert_raw_to_unified(byte[] data, int offset, int size,
 			String type, String desc, String sensor);
 			
-	private native String convert_unified_to_raw (String data);
+	native static byte[] convert_unified_to_raw (String jsondata);
 	
 	static
 	{

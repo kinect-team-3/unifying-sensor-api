@@ -10,18 +10,18 @@ extern "C" {
 /*
  * Class:     UnifyingAPI
  * Method:    convert_raw_to_unified
- * Signature: (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+ * Signature: ([BIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
-  (JNIEnv *, jobject, jstring, jint, jint, jstring, jstring, jstring);
+  (JNIEnv *, jclass, jbyteArray, jint, jint, jstring, jstring, jstring);
 
 /*
  * Class:     UnifyingAPI
  * Method:    convert_unified_to_raw
- * Signature: (Ljava/lang/String;)Ljava/lang/String;
+ * Signature: (Ljava/lang/String;)[B
  */
-JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1unified_1to_1raw
-  (JNIEnv *, jobject, jstring);
+JNIEXPORT jbyteArray JNICALL Java_UnifyingAPI_convert_1unified_1to_1raw
+  (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus
 }

@@ -8,11 +8,38 @@
  * Signature: (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
-  (JNIEnv *env, jobject obj, jstring data, jint offset, jint size, jstring type, jstring desc, jstring sensor)
+  (JNIEnv *env, jclass cla, jbyteArray data, jint offset, jint size, jstring type, jstring desc, jstring sensor)
   
 {
-	const char* cdata, ctype, cdesc, csensor;
 	size_t coffset, csize;
+	
+	// Convert from Java data types to C types
+	jbyte* b;
+	jboolean isCopy;
+	//int length = (*env)->GetArrayLength(env, data);
+	//(*env)->GetByteArrayRegion(env, data, 0, length, b);
+	b = (*env)->GetByteArrayElements(env, data, &isCopy);
+	const char* cdata = b;
+	
+	const char* ctype = (*env)->GetStringUTFChars(env, type, NULL);
+	const char* cdesc = (*env)->GetStringUTFChars(env, desc, NULL);
+	const char* csensor = (*env)->GetStringUTFChars(env, sensor, NULL);
+	
+	coffset = offset;
+	csize = size;
+	
+	// Run native C function
+	char* result = convert_raw_to_unified(cdata, coffset, csize,
+	ctype, cdesc, csensor);
+	
+	// Release the strings
+	(*env)->ReleaseStringUTFChars(env, type, ctype);
+	(*env)->ReleaseStringUTFChars(env, desc, cdesc);
+	(*env)->ReleaseStringUTFChars(env, sensor, csensor);
+	(*env)->ReleaseByteArrayElements(env, data, b, JNI_ABORT);
+	
+	// Create a new jstring from char*, return
+	return (*env)->NewStringUTF(env, result);
 }
 
 /*
@@ -20,15 +47,30 @@ JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
  * Method:    convert_unified_to_raw
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1unified_1to_1raw
-  (JNIEnv *env, jobject obj, jstring data)
+JNIEXPORT jbyteArray JNICALL Java_UnifyingAPI_convert_1unified_1to_1raw
+  (JNIEnv *env, jclass cla, jstring jsondata)
 
 {
-	const char* cdata = (*env)->GetStringUTFChars(env, data, NULL);
+	// jstring -> char*
+	const char* cdata = (*env)->GetStringUTFChars(env, jsondata, NULL);
 	
-	uint8_t* result = convert_unified_to_raw(cdata);
+	//printf("%s", cdata);
 	
-	(*env)->ReleaseStringUTFChars(env, data, cdata);
+	// get size
+	size_t* result_size;
 	
-	return (*env)->NewStringUTF(env, (char*) result);
+	// native C call
+	uint8_t* result = convert_unified_to_raw(cdata, result_size);
+	
+	// Release jstring, no longer needed
+	(*env)->ReleaseStringUTFChars(env, jsondata, cdata);
+	
+	//create new jbytearray
+	jbyteArray jb;
+	jb = (*env)->NewByteArray(env, *result_size);
+	
+	(*env)->SetByteArrayRegion(env, jb, 0, *result_size, (jbyte *) result);
+		
+	// return a new jb from result
+	return jb;
 }
