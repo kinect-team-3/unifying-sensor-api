@@ -2,6 +2,120 @@
 #include "unifying_functions.h"
 #include <jni.h>
 
+
+// ******************************
+// Setup Code for process_unified
+// ---------START----------------
+
+char* process_unified (const char* jsondata, int(*process)(uint8_t *, size_t *));
+
+JNIEnv *globalJavaEnv;
+jclass globalJavaClass;
+jmethodID globalMid;
+
+
+/* This is the interface to the Java function */
+int processFunc(uint8_t* bytestream, size_t* size)
+{
+	size_t i;
+	// convert bytestream to jbyteArray
+	// create new jbytearray
+	jbyteArray jb;
+	jb = (*globalJavaEnv)->NewByteArray(globalJavaEnv, *size);
+
+	(*globalJavaEnv)->SetByteArrayRegion(globalJavaEnv, jb, 0, *size, (jbyte *) bytestream);
+	/* Here's where we call back to the user's function in the Java code */
+	jbyteArray res = (jbyteArray) (*globalJavaEnv)->CallObjectMethod(globalJavaEnv, globalJavaClass, globalMid, (jbyteArray) jb);
+	
+	*size = (*globalJavaEnv)->GetArrayLength(globalJavaEnv, res);
+	
+	jboolean isCopy;
+	jbyte* b = (*globalJavaEnv)->GetByteArrayElements(globalJavaEnv, res, &isCopy);
+	
+	for (i = 0; i < *size; i++)
+		bytestream[i] = b[i];
+	
+	
+	return 0;
+}
+
+// ----------END------------------
+// *******************************
+
+/*
+ * Class:     UnifyingAPI
+ * Method:    process_unified_native
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
+  (JNIEnv *env, jclass jcl, jstring funcName, jstring jsondata)
+{
+	int fail;
+	const char* cjsondata;
+	const char* functionName;
+	jstring jresultJSON;
+	jclass cls;
+	jfieldID fid;
+
+	/* Copy the Java env pointers to global space
+	 so that rootfun can access them. */
+	globalJavaEnv = env;
+	globalJavaClass = jcl;
+	
+	/* Get hold of the name of the user's Java evaluation function. */
+	functionName = (*env)->GetStringUTFChars(env, funcName, NULL);
+	/* Get JSON data into jString */
+	cjsondata = (*env)->GetStringUTFChars(env, jsondata, NULL);
+	
+	/* Now we have the Java evaluation function name we
+     can use it to get hold of a handle (method ID) to the function.
+     Once more, the method ID is stored globally so that rootfun
+     can use it. Note that the Java function signature must be
+     "(D)D" (i.e. function with double argument, returning double). */
+	//cls = (*env)->GetObjectClass(env, jcl);
+	globalMid = (*env)->GetStaticMethodID(env, jcl, functionName, "([B)[B");
+	
+	// Release Strings
+	(*env)->ReleaseStringUTFChars(env, funcName, functionName);
+	
+	if (globalMid == 0)
+	{
+		/* Cannot find method "functionName" with signature (D)D */
+		
+		// Release Strings
+		(*env)->ReleaseStringUTFChars(env, jsondata, cjsondata);
+		
+		return -1;
+	}
+	else
+	{
+		/* Now call the function we're interested in from the rootlib C Library.
+		rootfun is the function that we want to find a root of. */
+		char* cresultJSON;
+		cresultJSON = process_unified(cjsondata, processFunc);
+		
+		// Convert char* back to jString
+		jresultJSON = (*env)->NewStringUTF(env, cresultJSON);
+
+		/* Put the results back to Java. */
+		/* Get the ID of the Java RootFinder class member variable
+		 "result" (which is of type double, hence the "D" signature). */
+		fid = (*env)->GetStaticFieldID(env, jcl, "result", "Ljava/lang/String;");
+		/* Set the result value via the ID */
+		(*env)->SetStaticObjectField(env, jcl, fid, jresultJSON);
+		
+		(*env)->ReleaseStringUTFChars(env, jresultJSON, cresultJSON);
+	}
+	
+	// Release Strings
+	(*env)->ReleaseStringUTFChars(env, jsondata, cjsondata);
+	
+	
+	return 0;
+}
+
+
+
 /*
  * Class:     UnifyingAPI
  * Method:    convert_raw_to_unified
@@ -19,7 +133,7 @@ JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
 	//int length = (*env)->GetArrayLength(env, data);
 	//(*env)->GetByteArrayRegion(env, data, 0, length, b);
 	b = (*env)->GetByteArrayElements(env, data, &isCopy);
-	const char* cdata = b;
+	const uint8_t* cdata = b;
 	
 	const char* ctype = (*env)->GetStringUTFChars(env, type, NULL);
 	const char* cdesc = (*env)->GetStringUTFChars(env, desc, NULL);

@@ -23,6 +23,14 @@ JNIEXPORT jstring JNICALL Java_UnifyingAPI_convert_1raw_1to_1unified
 JNIEXPORT jbyteArray JNICALL Java_UnifyingAPI_convert_1unified_1to_1raw
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     UnifyingAPI
+ * Method:    process_unified_native
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
+  (JNIEnv *, jclass, jstring, jstring);
+
 #ifdef __cplusplus
 }
 #endif
