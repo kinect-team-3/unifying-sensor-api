@@ -58,7 +58,7 @@ JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
 	jfieldID fid;
 
 	/* Copy the Java env pointers to global space
-	 so that rootfun can access them. */
+	 so that processFunc can access them. */
 	globalJavaEnv = env;
 	globalJavaClass = jcl;
 	
@@ -69,9 +69,9 @@ JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
 	
 	/* Now we have the Java evaluation function name we
      can use it to get hold of a handle (method ID) to the function.
-     Once more, the method ID is stored globally so that rootfun
+     Once more, the method ID is stored globally so that processFunc
      can use it. Note that the Java function signature must be
-     "(D)D" (i.e. function with double argument, returning double). */
+     "([B)[B" (i.e. function with bytearray argument, returning bytearray). */
 	//cls = (*env)->GetObjectClass(env, jcl);
 	globalMid = (*env)->GetStaticMethodID(env, jcl, functionName, "([B)[B");
 	
@@ -80,7 +80,7 @@ JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
 	
 	if (globalMid == 0)
 	{
-		/* Cannot find method "functionName" with signature (D)D */
+		/* Cannot find method "functionName" with signature ([B)[B */
 		
 		// Release Strings
 		(*env)->ReleaseStringUTFChars(env, jsondata, cjsondata);
@@ -89,8 +89,7 @@ JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
 	}
 	else
 	{
-		/* Now call the function we're interested in from the rootlib C Library.
-		rootfun is the function that we want to find a root of. */
+		/* Now call the function we're interested in from the unifying_functions.c C Library. */
 		char* cresultJSON;
 		cresultJSON = process_unified(cjsondata, processFunc);
 		
@@ -98,8 +97,8 @@ JNIEXPORT jint JNICALL Java_UnifyingAPI_process_1unified_1native
 		jresultJSON = (*env)->NewStringUTF(env, cresultJSON);
 
 		/* Put the results back to Java. */
-		/* Get the ID of the Java RootFinder class member variable
-		 "result" (which is of type double, hence the "D" signature). */
+		/* Get the ID of the Java UnifyingAPI class member variable
+		 "result" (which is of type String, hence the "Ljava/lang/String;" signature). */
 		fid = (*env)->GetStaticFieldID(env, jcl, "result", "Ljava/lang/String;");
 		/* Set the result value via the ID */
 		(*env)->SetStaticObjectField(env, jcl, fid, jresultJSON);
