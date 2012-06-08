@@ -1,7 +1,28 @@
-# A makefile for managing build of Unifying Sensor API
+# /**************************************************************
+# This file is part of Kinect Sensor Architecture Development Project.
 #
-# Author: Carson Tang
-# Date: 05/08/2012
+#   Kinect Sensor Architecture Development Project is free software:
+# you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+
+#   Kinect Sensor Architecture Development Project is distributed in
+# the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License
+#  along with Kinect Sensor Architecture Development Project.  If
+# not, see <http://www.gnu.org/licenses/>.
+# **************************************************************/
+# /**************************************************************
+# The work was done in joint collaboration with Cisco Systems Inc.
+# Copyright © 2012, Cisco Systems, Inc. and UCLA
+# *************************************************************/
+
+# A makefile for managing build of Unifying Sensor API
 
 CC = gcc
 
@@ -10,7 +31,7 @@ CC = gcc
 # -Wall			give verbose compiler warnings
 # -O0				do not optimize generated code
 # -std=c99	use the C99 standard language definition
-CFLAGS = -g -Wall -O0 -std=c99 -I lib -I src
+CFLAGS = -g -Wall -O0 -std=c99 -I lib -I src -arch i386
 MATH = -lm
 NOLINK = -c
 
@@ -31,22 +52,7 @@ unifying_functions.o: src/unifying_functions.c src/unifying_functions.h
 
 translatetest: test/translatetest.c
 	$(CC) $(CFLAGS) test/translatetest.c -o test/translatetest
-
-### I don't think these cases were written correctly
-
-#imagetest: test/imagetest.o src/imgheaderfmt.o 
-#	$(CC) $(CFLAGS) test/imagetest.o -o test/imagetestprogram
-
-#imgheaderfmt.o : src/imgheaderfmt.c src/imgheaderfmt.h
-#	$(CC) $(CFLAGS) src/imgheaderfmt.c
-
-#videotest: test/videotest.o
-#	$(CC) $(CFLAGS) test/videotest.o -o test/videotestprogram
-
-#videotest.o: test/videotest.c src/videoheaderfmt.h
-#	$(CC) $(CFLAGS) test/videotest.c
 		
 
 clean:
-#	@rm -rf test/imagetest.o test/imagetestprogram test/videotest.o test/videotestprogram src/imgheaderfmt.o src/unifying_functions.o lib/cJSON.o test/demotest.o
 	@rm -rf test/demotest.o src/unifying_functions.o lib/cJSON.o demotest test/translatetest
